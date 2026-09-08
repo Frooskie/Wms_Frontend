@@ -6,7 +6,8 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "generate-api": "nswag run nswag.json"
   },
   "private": true,
   "packageManager": "npm@12.0.2",
@@ -17,6 +18,11 @@
     "@angular/forms": "^22.1.0",
     "@angular/platform-browser": "^22.1.0",
     "@angular/router": "^22.1.0",
+    "@ngrx/signals": "^22.0.0",
+    "@primeuix/themes": "^3.0.0",
+    "primeflex": "^4.0.0",
+    "primeicons": "^8.0.0",
+    "primeng": "^22.1.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },

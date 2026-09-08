@@ -1,59 +1,105 @@
-# Wms
+# WMS Frontend (Angular 22)
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.1.7.
+## 📚 Документация
 
-## Development server
+Подробное описание архитектуры, управления состоянием, API-интеграции и других аспектов фронтенда находится в папке [`/docs`](docs/) репозитория. В ней содержатся следующие материалы:
 
-To start a local development server, run:
+| Файл | Описание |
+|------|----------|
+| [`architecture.md`](docs/architecture.md) | Описание общей архитектуры приложения, технологического стека, структуры каталогов, принципов проектирования и безопасности. |
+| [`state-management.md`](docs/state-management.md) | Управление состоянием: глобальные сторы (SignalStore), локальные сигналы, асинхронные данные через Resource API. |
+| [`api-integration.md`](docs/api-integration.md) | Интеграция с бэкендом: генерация клиента через NSwag, HTTP-интерсепторы, работа с httpResource, мутации, прокси для разработки. |
 
+Кроме того, для ознакомления с API бэкенда доступна интерактивная документация через Swagger UI по адресу:
+
+https://localhost:5001/swagger
+
+(порт может отличаться в зависимости от настроек запуска)
+
+---
+
+## 📋 Требования
+- **Node.js** >= v22.22.0
+- **npm** или **yarn**
+- **Angular CLI** (устанавливается локально, можно использовать `npx ng`)
+
+## 🚀 Быстрый старт
+
+### 1. Клонирование репозитория
+```bash
+git clone <url-репозитория>
+cd wms-frontend
+```
+
+### 2. Установка зависимостей
+```bash
+npm install
+```
+
+### 3. Генерация API-клиента (если обновился `swagger.json`)
+```bash
+npm run generate-api
+```
+Файл `swagger.json` должен лежать в корне проекта. Клиент будет сгенерирован в `src/app/core/api/wms-api.ts`.
+
+### 4. Запуск сервера разработки
 ```bash
 ng serve
 ```
+После запуска приложение будет доступно по адресу [http://localhost:4200](http://localhost:4200).
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Прокси-конфиг для обхода CORS уже настроен, используется автоматически.
 
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
-
+### 5. Сборка для production
 ```bash
 ng build
 ```
+Результат сборки — в папке `dist/`.
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+---
 
-## Running unit tests
+## 📁 Структура проекта (основные каталоги)
+- **`src/app/core/`** — общие механизмы (API-клиент, аутентификация, интерсепторы, глобальные сторы).
+- **`src/app/features/`** — функциональные модули (логин, товары, склады, партии, приёмка и т.д.).
+- **`src/app/shared/`** — переиспользуемые компоненты, директивы, пайпы.
+- **`src/app/app.ts`** — корневой компонент.
+- **`src/app/app.config.ts`** — конфигурация приложения (провайдеры).
+- **`src/app/app.routes.ts`** — маршрутизация.
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+Подробное описание архитектуры — в [docs/architecture.md](docs/architecture.md).
 
-```bash
-ng test
-```
+---
 
-## Running end-to-end tests
+## 🧩 Используемые технологии и библиотеки
 
-For end-to-end (e2e) testing, run:
+| Компонент | Технология |
+|-----------|------------|
+| Фреймворк | Angular 22.1.0 |
+| Язык | TypeScript 6.0+ |
+| Управление состоянием | NgRx SignalStore (глобальное), сигналы (локальное) |
+| Формы | Signal Forms (`@angular/forms/signals`) |
+| HTTP-клиент | `@angular/common/http` с функциональными интерсепторами |
+| Генерация клиента | NSwag (OpenAPI → TypeScript) |
+| UI-компоненты | PrimeNG (последняя стабильная версия) |
+| Стили | SCSS + PrimeFlex |
+| Сборка | Angular CLI |
+| Тестирование | Jest / Karma (опционально) |
 
-```bash
-ng e2e
-```
+---
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+## 🔐 Аутентификация и безопасность
+- JWT-токен хранится в `localStorage`.
+- Функциональный интерсептор автоматически добавляет заголовок `Authorization: Bearer` ко всем запросам (кроме `/login` и `/register`).
+- Функциональный гард `authGuard` защищает маршруты, требующие аутентификации.
+- Глобальное состояние пользователя управляется через `AuthStore` (SignalStore).
 
-## Additional Resources
+---
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+## 📦 Команды
+
+| Команда | Описание |
+|---------|----------|
+| `npm start` или `ng serve` | Запуск сервера разработки |
+| `npm run build` | Сборка production-версии |
+| `npm run generate-api` | Генерация TypeScript-клиента по Swagger |
+| `ng test` | Запуск тестов |
