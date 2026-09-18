@@ -1,0 +1,71 @@
+<div class="register-wrapper">
+  <form [formRoot]="registerForm" class="register-card">
+    <h1 class="register-title">Регистрация</h1>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Полное имя</mat-label>
+      <input matInput type="text" autocomplete="name" [formField]="registerForm.fullName" />
+
+      @if (registerForm.fullName().touched() && registerForm.fullName().invalid()) {
+        <mat-error>{{ registerForm.fullName().errors()[0]?.message }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Email</mat-label>
+      <input matInput type="email" autocomplete="email" [formField]="registerForm.email" />
+
+      @if (registerForm.email().touched() && registerForm.email().invalid()) {
+        <mat-error>{{ registerForm.email().errors()[0]?.message }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Пароль</mat-label>
+      <input matInput type="password" autocomplete="new-password" [formField]="registerForm.password" />
+
+      @if (registerForm.password().touched() && registerForm.password().invalid()) {
+        <mat-error>{{ registerForm.password().errors()[0]?.message }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Роль</mat-label>
+      <mat-select [formField]="registerForm.role">
+        @for (role of roleOptions; track role.value) {
+          <mat-option [value]="role.value">{{ role.label }}</mat-option>
+        }
+      </mat-select>
+
+      @if (registerForm.role().touched() && registerForm.role().invalid()) {
+        <mat-error>{{ registerForm.role().errors()[0]?.message }}</mat-error>
+      }
+    </mat-form-field>
+
+    @if (error()) {
+      <div class="form-error" role="alert">{{ error() }}</div>
+    }
+
+    <button
+      matButton="filled"
+      type="submit"
+      class="submit-button"
+      [disabled]="registerForm().submitting()"
+      [showProgress]="registerForm().submitting()"
+    >
+      @if (registerForm().submitting()) {
+        Отправка…
+      } @else {
+        Зарегистрировать
+      }
+
+      <mat-progress-spinner progressIndicator diameter="20" mode="indeterminate" />
+    </button>
+
+    <div class="register-actions">
+      <button matButton="text" type="button" (click)="cancel()">
+        Назад на главную
+      </button>
+    </div>
+  </form>
+</div>

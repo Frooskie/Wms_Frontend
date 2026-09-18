@@ -1,0 +1,57 @@
+<div class="login-wrapper">
+  <form [formRoot]="loginForm" class="login-card">
+    <h1 class="login-title">Вход в WMS</h1>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Email</mat-label>
+      <input
+        matInput
+        type="email"
+        autocomplete="email"
+        [formField]="loginForm.email"
+      />
+
+      @if (loginForm.email().touched() && loginForm.email().invalid()) {
+        <mat-error>{{ loginForm.email().errors()[0]?.message }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Пароль</mat-label>
+      <input
+        matInput
+        type="password"
+        autocomplete="current-password"
+        [formField]="loginForm.password"
+      />
+
+      @if (loginForm.password().touched() && loginForm.password().invalid()) {
+        <mat-error>{{ loginForm.password().errors()[0]?.message }}</mat-error>
+      }
+    </mat-form-field>
+
+    @if (error()) {
+      <div class="form-error" role="alert">{{ error() }}</div>
+    }
+
+    <button
+      matButton="filled"
+      type="submit"
+      class="submit-button"
+      [disabled]="loginForm().submitting()"
+      [showProgress]="loginForm().submitting()"
+    >
+      @if (loginForm().submitting()) {
+        Вход…
+      } @else {
+        Войти
+      }
+
+      <mat-progress-spinner
+        progressIndicator
+        diameter="20"
+        mode="indeterminate"
+      />
+    </button>
+  </form>
+</div>

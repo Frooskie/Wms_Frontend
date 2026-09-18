@@ -1,0 +1,22 @@
+<div class="dashboard">
+  <mat-card appearance="outlined">
+    <mat-card-content>
+      <h1 class="dashboard-title">
+        Добро пожаловать, {{ authStore.user()?.fullName ?? 'гость' }}
+      </h1>
+      <p>Email: {{ authStore.user()?.email ?? '—' }}</p>
+      <p>Роли: {{ authStore.user()?.roles?.join(', ') || '—' }}</p>
+
+      <div class="dashboard-actions">
+        @if (isChief()) {
+          <button matButton="filled" type="button" (click)="goToRegister()">
+            Зарегистрировать пользователя
+          </button>
+        }
+        <button matButton="outlined" type="button" (click)="logout()">
+          Выйти
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -1,0 +1,22 @@
+.dashboard {
+  padding: 2rem;
+  display: flex;
+  justify-content: center;
+}
+
+mat-card {
+  max-width: 32rem;
+  width: 100%;
+}
+
+.dashboard-title {
+  margin: 0 0 1rem;
+  font: var(--mat-sys-headline-small);
+}
+
+.dashboard-actions {
+  margin-top: 1.5rem;
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
