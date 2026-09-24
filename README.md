@@ -181,3 +181,5 @@ ng build
   `string`).
 - **Ошибки API** — обрабатываются по `ErrorCodes`, а не по тексту.
   См. [`docs/error-handling.md`](docs/error-handling.md).
+- **Локализация Material** — через кастомные `MatXxxIntl`-провайдеры
+    (см. `shared/i18n/`).

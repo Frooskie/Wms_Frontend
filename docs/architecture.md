@@ -318,6 +318,22 @@ mode).
   })
   ```
 
+### 8.4. Локализация Angular Material
+
+Встроенные строки Material (например, «Items per page» в `MatPaginator`)
+не переводятся автоматически. Для русской локализации создан класс
+`RuPaginatorIntl` в `src/app/shared/i18n/ru-paginator-intl.ts`,
+наследующий `MatPaginatorIntl`, и зарегистрирован в `app.config.ts`:
+
+```typescript
+{ provide: MatPaginatorIntl, useClass: RuPaginatorIntl }
+```
+
+**Почему через `providers`, а не через `@Injectable({ providedIn: 'root' })`.**
+Провайдер подменяет реализацию DI-токена `MatPaginatorIntl`, а не
+регистрирует новый сервис. Такой подход позволяет в тестах подменять
+локализацию (например, на английскую) без глобальных правок.
+
 ---
 
 ## 9. Обработка ошибок
