@@ -1,32 +1,34 @@
 <form [formRoot]="cellForm">
   <h2 mat-dialog-title>{{ title() }}</h2>
 
-  <mat-dialog-content class="form-grid">
-    <mat-form-field appearance="outline">
-      <mat-label>Код ячейки</mat-label>
-      <input matInput type="text" [formField]="cellForm.code" />
+  <mat-dialog-content>
+    <div class="form-grid">
+      <mat-form-field appearance="outline">
+        <mat-label>Код ячейки</mat-label>
+        <input matInput type="text" [formField]="cellForm.code" />
 
-      @if (cellForm.code().touched() && cellForm.code().invalid()) {
-        <mat-error>{{ cellForm.code().errors()[0]?.message }}</mat-error>
-      }
-    </mat-form-field>
-
-    <mat-form-field appearance="outline">
-      <mat-label>Полка</mat-label>
-      <mat-select [formField]="cellForm.shelfId">
-        @for (s of shelvesResource.value() ?? []; track s.id) {
-          <mat-option [value]="s.id">Полка №{{ s.number }}</mat-option>
+        @if (cellForm.code().touched() && cellForm.code().invalid()) {
+          <mat-error>{{ cellForm.code().errors()[0]?.message }}</mat-error>
         }
-      </mat-select>
+      </mat-form-field>
 
-      @if (cellForm.shelfId().touched() && cellForm.shelfId().invalid()) {
-        <mat-error>{{ cellForm.shelfId().errors()[0]?.message }}</mat-error>
+      <mat-form-field appearance="outline">
+        <mat-label>Полка</mat-label>
+        <mat-select [formField]="cellForm.shelfId">
+          @for (s of shelvesResource.value() ?? []; track s.id) {
+            <mat-option [value]="s.id">Полка №{{ s.number }}</mat-option>
+          }
+        </mat-select>
+
+        @if (cellForm.shelfId().touched() && cellForm.shelfId().invalid()) {
+          <mat-error>{{ cellForm.shelfId().errors()[0]?.message }}</mat-error>
+        }
+      </mat-form-field>
+
+      @if (error()) {
+        <div class="form-error" role="alert">{{ error() }}</div>
       }
-    </mat-form-field>
-
-    @if (error()) {
-      <div class="form-error" role="alert">{{ error() }}</div>
-    }
+    </div>
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">

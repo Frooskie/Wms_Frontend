@@ -6,6 +6,10 @@
   width: 15rem;
   background: var(--mat-sys-surface-container);
   border-right: 1px solid var(--mat-sys-outline-variant);
+
+  mat-nav-list {
+    padding: 0.5rem;
+  }
 }
 
 .shell__brand {

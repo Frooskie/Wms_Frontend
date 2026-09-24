@@ -1,29 +1,31 @@
 <form [formRoot]="warehouseForm">
   <h2 mat-dialog-title>{{ title() }}</h2>
 
-  <mat-dialog-content class="form-grid">
-    <mat-form-field appearance="outline">
-      <mat-label>Название</mat-label>
-      <input matInput type="text" [formField]="warehouseForm.name" />
+  <mat-dialog-content>
+    <div class="form-grid">
+      <mat-form-field appearance="outline">
+        <mat-label>Название</mat-label>
+        <input matInput type="text" [formField]="warehouseForm.name" />
 
-      @if (warehouseForm.name().touched() && warehouseForm.name().invalid()) {
-        <mat-error>{{ warehouseForm.name().errors()[0]?.message }}</mat-error>
+        @if (warehouseForm.name().touched() && warehouseForm.name().invalid()) {
+          <mat-error>{{ warehouseForm.name().errors()[0]?.message }}</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Адрес</mat-label>
+        <input matInput type="text" [formField]="warehouseForm.address" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Контактный телефон</mat-label>
+        <input matInput type="tel" [formField]="warehouseForm.contactPhone" />
+      </mat-form-field>
+
+      @if (error()) {
+        <div class="form-error" role="alert">{{ error() }}</div>
       }
-    </mat-form-field>
-
-    <mat-form-field appearance="outline">
-      <mat-label>Адрес</mat-label>
-      <input matInput type="text" [formField]="warehouseForm.address" />
-    </mat-form-field>
-
-    <mat-form-field appearance="outline">
-      <mat-label>Контактный телефон</mat-label>
-      <input matInput type="tel" [formField]="warehouseForm.contactPhone" />
-    </mat-form-field>
-
-    @if (error()) {
-      <div class="form-error" role="alert">{{ error() }}</div>
-    }
+    </div>
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">

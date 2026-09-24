@@ -7,7 +7,7 @@ import {
 } from '@angular/material/sidenav';
 import { MatToolbar } from '@angular/material/toolbar';
 import { MatIcon } from '@angular/material/icon';
-import { MatNavList, MatListItem } from '@angular/material/list';
+import { MatNavList, MatListItem, MatListItemIcon, MatListItemTitle } from '@angular/material/list';
 import { AuthStore } from './core/store';
 
 @Component({
@@ -23,6 +23,8 @@ import { AuthStore } from './core/store';
     MatIcon,
     MatNavList,
     MatListItem,
+    MatListItemIcon,
+    MatListItemTitle,
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss',
