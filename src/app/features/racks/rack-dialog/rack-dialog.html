@@ -1,0 +1,48 @@
+<form [formRoot]="rackForm">
+  <h2 mat-dialog-title>{{ title() }}</h2>
+
+  <mat-dialog-content class="form-grid">
+    <mat-form-field appearance="outline">
+      <mat-label>Код стеллажа</mat-label>
+      <input matInput type="text" [formField]="rackForm.code" />
+
+      @if (rackForm.code().touched() && rackForm.code().invalid()) {
+        <mat-error>{{ rackForm.code().errors()[0]?.message }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Зона</mat-label>
+      <mat-select [formField]="rackForm.zoneId">
+        @for (z of zonesResource.value() ?? []; track z.id) {
+          <mat-option [value]="z.id">{{ z.name }}</mat-option>
+        }
+      </mat-select>
+
+      @if (rackForm.zoneId().touched() && rackForm.zoneId().invalid()) {
+        <mat-error>{{ rackForm.zoneId().errors()[0]?.message }}</mat-error>
+      }
+    </mat-form-field>
+
+    @if (error()) {
+      <div class="form-error" role="alert">{{ error() }}</div>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button matButton type="button" (click)="cancel()">Отмена</button>
+    <button
+      matButton="filled"
+      type="submit"
+      [disabled]="rackForm().submitting()"
+      [showProgress]="rackForm().submitting()"
+    >
+      Сохранить
+      <mat-progress-spinner
+        progressIndicator
+        diameter="20"
+        mode="indeterminate"
+      />
+    </button>
+  </mat-dialog-actions>
+</form>

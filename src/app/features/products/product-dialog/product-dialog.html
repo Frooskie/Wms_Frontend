@@ -1,0 +1,65 @@
+<form [formRoot]="productForm">
+  <h2 mat-dialog-title>{{ title() }}</h2>
+
+  <mat-dialog-content class="form-grid">
+    <mat-form-field appearance="outline">
+      <mat-label>Название</mat-label>
+      <input matInput type="text" [formField]="productForm.name" />
+
+      @if (productForm.name().touched() && productForm.name().invalid()) {
+        <mat-error>{{ productForm.name().errors()[0]?.message }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Производитель</mat-label>
+      <input matInput type="text" [formField]="productForm.manufacturer" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Поставщик</mat-label>
+      <input matInput type="text" [formField]="productForm.supplier" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Категория</mat-label>
+      <input matInput type="text" [formField]="productForm.category" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Единица измерения</mat-label>
+      <input matInput type="text" [formField]="productForm.unit" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Минимальный остаток</mat-label>
+      <input
+        matInput
+        type="number"
+        step="1"
+        [formField]="productForm.minStockThreshold"
+      />
+    </mat-form-field>
+
+    @if (error()) {
+      <div class="form-error" role="alert">{{ error() }}</div>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button matButton type="button" (click)="cancel()">Отмена</button>
+    <button
+      matButton="filled"
+      type="submit"
+      [disabled]="productForm().submitting()"
+      [showProgress]="productForm().submitting()"
+    >
+      Сохранить
+      <mat-progress-spinner
+        progressIndicator
+        diameter="20"
+        mode="indeterminate"
+      />
+    </button>
+  </mat-dialog-actions>
+</form>

@@ -3,7 +3,7 @@ import { inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../auth/auth.service';
 import { AuthResponse, WmsProblemDetails } from '../api/wms-api';
-import { extractErrorMessage, toWmsProblemDetails } from '../utils/problem-details';
+import { extractErrorMessage, hasFieldErrors, toWmsProblemDetails } from '../utils/problem-details';
 
 type AuthState = {
   user: { email: string; fullName: string; roles: string[] } | null;
@@ -20,11 +20,6 @@ const initialState: AuthState = {
   error: null,
   registerSuccess: false,
 };
-
-/** Есть ли у problem полевые ошибки валидации? */
-function hasFieldErrors(problem: WmsProblemDetails | null): boolean {
-  return !!problem?.errors && Object.keys(problem.errors).length > 0;
-}
 
 /**
  * Глобальный стор аутентификации.
@@ -63,12 +58,11 @@ export const AuthStore = signalStore(
       patchState(store, { isLoading: true, error: null });
 
       try {
-        const response: AuthResponse = await firstValueFrom(
-          authService.login(email, password)
-        );
+        const response: AuthResponse = await firstValueFrom(authService.login(email, password));
 
         if (!response.token || !response.email) {
           patchState(store, { isLoading: false, error: 'Неверный ответ сервера' });
+
           return null;
         }
 
@@ -113,6 +107,7 @@ export const AuthStore = signalStore(
 
       try {
         await firstValueFrom(authService.register(email, password, fullName, role));
+
         patchState(store, {
           isLoading: false,
           error: null,

@@ -68,13 +68,17 @@
 общий `error`. Это устраняет двойное уведомление: пользователь видит
 `<mat-error>` под полем, а баннер сверху не показывается.
 
-Реализовано через локальную проверку `hasFieldErrors(problem)`:
+Проверка вынесена в общую утилиту `hasFieldErrors` в
+`src/app/core/utils/problem-details.ts`:
 
 ```typescript
-function hasFieldErrors(problem: WmsProblemDetails | null): boolean {
+export function hasFieldErrors(problem: WmsProblemDetails | null): boolean {
   return !!problem?.errors && Object.keys(problem.errors).length > 0;
 }
 ```
+
+Утилита переиспользуется в сторах, диалогах и (при необходимости) в
+других местах — единая точка правды.
 
 #### `NotificationStore` (план)
 
@@ -107,13 +111,38 @@ protected readonly isChief = computed(
 
 ## 4. Асинхронные данные — Resource API
 
-Для **чтения данных** с сервера используется `httpResource` (или
-`rxResource`). Они автоматически управляют состояниями `value`,
-`error`, `isLoading` и перезагружаются при изменении сигналов-зависимостей.
+Для **чтения данных** используется **`rxResource`** — потому что
+данные идут через сервис-обёртку, возвращающую `Observable`. Он
+автоматически управляет состояниями `value`, `error`, `isLoading`
+и перезагружается при изменении сигналов в `params`.
 
-Для **мутаций** (POST, PUT, DELETE) используется API-клиент напрямую
-через `firstValueFrom`, после чего вызывается `reload()` у ресурса или
-обновляется сигнал-зависимость.
+**Актуальная сигнатура `rxResource`** (Angular 20+):
+
+```typescript
+protected readonly productsResource = rxResource({
+  params: () => ({
+    pageNumber: this.pageNumber(),
+    pageSize: this.pageSize(),
+  }),
+  stream: ({ params }) =>
+    this.productService.getPaged(params.pageNumber, params.pageSize),
+});
+```
+
+Для справочников без реактивных параметров:
+
+```typescript
+protected readonly warehousesResource = rxResource({
+  stream: () => this.warehouseService.getAll(),
+});
+```
+
+**`httpResource`** применяется только для запросов вне
+OpenAPI-спецификации (статические ассеты, сторонние API).
+
+Для **мутаций** (POST, PUT, DELETE) используется сервис-обёртка
+через `firstValueFrom` в `async` методах; после успеха вызывается
+`reload()` у зависимого `rxResource`.
 
 ---
 
@@ -133,11 +162,15 @@ protected readonly isChief = computed(
 ### 6.1. Где хранить состояние
 
 - **Глобальный стор** — для данных, используемых в разных частях
-  приложения (пользователь, уведомления, справочники с кешем).
+  приложения (пользователь, уведомления). **Справочники сюда НЕ
+  выносятся** — они кэшируются на уровне отдельных компонентов
+  через `rxResource`.
 - **Локальные сигналы** — для всего, что нужно одному компоненту
   (фильтры, пагинация, состояние модалки).
-- **Resource API** — для всех GET-запросов с пагинацией и
-  фильтрацией. Для POST/PUT/DELETE — API-клиент напрямую.
+- **`linkedSignal`** — для производного-но-мутабельного (модели
+  форм в диалогах).
+- **Resource API** (`rxResource`) — для всех GET-запросов.
+- **Сервис-обёртка + `firstValueFrom`** — для POST/PUT/DELETE.
 
 ### 6.2. Как работать с асинхронностью
 

@@ -1,0 +1,23 @@
+.shell {
+  height: 100vh;
+}
+
+.shell__nav {
+  width: 15rem;
+  background: var(--mat-sys-surface-container);
+  border-right: 1px solid var(--mat-sys-outline-variant);
+}
+
+.shell__brand {
+  background: var(--mat-sys-surface-container);
+  font: var(--mat-sys-title-medium);
+}
+
+.shell__content {
+  background: var(--mat-sys-surface);
+}
+
+a.active {
+  background: var(--mat-sys-secondary-container);
+  color: var(--mat-sys-on-secondary-container);
+}

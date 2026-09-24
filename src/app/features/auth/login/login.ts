@@ -14,7 +14,6 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { AuthStore } from '../../../core/store';
 import { buildServerFieldErrors } from '../../../core/utils/form-errors';
 
-/** Соответствие серверных имён (C#) и полей формы. */
 const LOGIN_FIELD_MAP = {
   Email: 'email',
   Password: 'password',
@@ -76,6 +75,7 @@ export class Login {
       if (this.authStore.token()) {
         const returnUrl =
           this.route.snapshot.queryParamMap.get('returnUrl') ?? '/dashboard';
+
         untracked(() => void this.router.navigateByUrl(returnUrl));
       }
     });

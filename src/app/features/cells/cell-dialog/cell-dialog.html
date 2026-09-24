@@ -1,0 +1,48 @@
+<form [formRoot]="cellForm">
+  <h2 mat-dialog-title>{{ title() }}</h2>
+
+  <mat-dialog-content class="form-grid">
+    <mat-form-field appearance="outline">
+      <mat-label>Код ячейки</mat-label>
+      <input matInput type="text" [formField]="cellForm.code" />
+
+      @if (cellForm.code().touched() && cellForm.code().invalid()) {
+        <mat-error>{{ cellForm.code().errors()[0]?.message }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Полка</mat-label>
+      <mat-select [formField]="cellForm.shelfId">
+        @for (s of shelvesResource.value() ?? []; track s.id) {
+          <mat-option [value]="s.id">Полка №{{ s.number }}</mat-option>
+        }
+      </mat-select>
+
+      @if (cellForm.shelfId().touched() && cellForm.shelfId().invalid()) {
+        <mat-error>{{ cellForm.shelfId().errors()[0]?.message }}</mat-error>
+      }
+    </mat-form-field>
+
+    @if (error()) {
+      <div class="form-error" role="alert">{{ error() }}</div>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button matButton type="button" (click)="cancel()">Отмена</button>
+    <button
+      matButton="filled"
+      type="submit"
+      [disabled]="cellForm().submitting()"
+      [showProgress]="cellForm().submitting()"
+    >
+      Сохранить
+      <mat-progress-spinner
+        progressIndicator
+        diameter="20"
+        mode="indeterminate"
+      />
+    </button>
+  </mat-dialog-actions>
+</form>

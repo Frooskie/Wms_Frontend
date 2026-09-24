@@ -1,0 +1,94 @@
+<div class="page">
+  <header class="page__header">
+    <h1 class="page__title">Ячейки</h1>
+
+    @if (canEdit()) {
+      <button matButton="filled" type="button" (click)="openCreateDialog()">
+        Добавить ячейку
+      </button>
+    }
+  </header>
+
+  @if (isLoading()) {
+    <div class="page__loading">
+      <mat-progress-spinner mode="indeterminate" diameter="40" />
+    </div>
+  } @else if (items().length === 0) {
+    <mat-card appearance="outlined">
+      <mat-card-content>Список ячеек пуст.</mat-card-content>
+    </mat-card>
+  } @else {
+    <mat-card appearance="outlined">
+      <mat-card-content>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th class="data-table__id">ID</th>
+              <th>Код</th>
+              <th>Полка</th>
+              <th>Статус</th>
+              @if (canEdit()) {
+                <th class="data-table__actions">Действия</th>
+              }
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (cell of items(); track cell.id) {
+              <tr>
+                <td>{{ cell.id }}</td>
+                <td>{{ cell.code ?? '—' }}</td>
+                <td>{{ shelfMap().get(cell.shelfId!) ?? '—' }}</td>
+
+                <td>
+                  <span
+                    class="badge"
+                    [class.badge--occupied]="cell.isOccupied"
+                    [class.badge--free]="!cell.isOccupied"
+                  >
+                    {{ cell.isOccupied ? 'Занята' : 'Свободна' }}
+                  </span>
+                </td>
+
+                @if (canEdit()) {
+                  <td class="data-table__actions">
+                    <button
+                      matButton="text"
+                      type="button"
+                      (click)="openEditDialog(cell)"
+                    >
+                      Изменить
+                    </button>
+
+                    <button
+                      matButton="text"
+                      type="button"
+                      [disabled]="deletingId() === cell.id"
+                      [showProgress]="deletingId() === cell.id"
+                      (click)="delete(cell)"
+                    >
+                      Удалить
+                      <mat-progress-spinner
+                        progressIndicator
+                        diameter="16"
+                        mode="indeterminate"
+                      />
+                    </button>
+                  </td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <mat-paginator
+    [length]="totalCount()"
+    [pageSize]="pageSize()"
+    [pageIndex]="pageNumber() - 1"
+    [pageSizeOptions]="[10, 25, 50]"
+    (page)="onPageChange($event)"
+  />
+</div>

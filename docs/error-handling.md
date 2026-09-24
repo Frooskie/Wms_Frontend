@@ -269,9 +269,28 @@ Store: error() = problem.title → баннер в форме (если форм
 
 - Разложить по полям формы (см. §6).
 - Баннер сверху **не показывать** — иначе двойное уведомление.
-- Если сервер вернул `errors` с ключами, не сматчившимися ни с
-  одним полем формы (например, добавили новое поле на бэке) —
-  показать `problem.title` баннером, чтобы ошибка не потерялась.
+
+> ⚠️ **Известное ограничение (в плане).** Если сервер вернул `errors`
+> с ключами, не сматчившимися ни с одним полем формы (например,
+> добавили новое поле на бэке), `buildServerFieldErrors` вернёт
+> `undefined`, а баннер мы не покажем — ошибка «потеряется».
+>
+> **Временное решение** (пока не реализовано): в `submission.action`
+> добавить проверку:
+>
+> ```typescript
+> if (problem) {
+>   const fieldErrors = buildServerFieldErrors(
+>     problem,
+>     PRODUCT_FIELD_MAP,
+>     (name) => detail.root[name],
+>   );
+>   if (!fieldErrors && !hasFieldErrors(problem)) {
+>     this.error.set(problem.title ?? 'Ошибка валидации');
+>   }
+>   return fieldErrors;
+> }
+> ```
 
 ### 5.3. Бизнес-ошибки (400 без `errors`)
 
@@ -309,31 +328,24 @@ Store: error() = problem.title → баннер в форме (если форм
 маппит и формирует массив `ValidationError[]`, который понимает
 `submission.action` Signal Forms.
 
-### 6.1. Утилита (файл `src/app/core/utils/form-errors.ts`)
+### 6.1. Утилиты (файл `src/app/core/utils/`)
 
-Экспортирует:
+**`form-errors.ts`** экспортирует:
 
 - `ServerValidationError` — алиас `ValidationError.WithOptionalFieldTree`.
 - `ServerFieldTree` — алиас `NonNullable<ServerValidationError['fieldTree']>`.
 - `buildServerFieldErrors<K extends string>(problem, serverToFormField, resolveFieldTree)`.
 
-Сигнатура:
+**`problem-details.ts`** экспортирует:
 
-```typescript
-function buildServerFieldErrors<K extends string>(
-  problem: WmsProblemDetails | null,
-  serverToFormField: Record<string, K>,
-  resolveFieldTree: (field: K) => ServerFieldTree,
-): ServerValidationError[] | undefined;
-```
+- `isWmsProblemDetails(value)` — type guard.
+- `toWmsProblemDetails(error)` — нормализация любой ошибки.
+- `extractErrorMessage(error, fallback)` — человекочитаемое сообщение.
+- `extractErrorCode(error)` — `ErrorCodes | undefined`.
+- `hasFieldErrors(problem)` — есть ли полевые ошибки.
 
-Возвращает:
-
-- `undefined` — если `problem == null`, нет `errors`, или ни одно
-  серверное поле не сматчилось.
-- Массив `ValidationError[]` — по одному элементу на каждое сообщение
-  сервера, с `kind: 'server'`, `message` и `fieldTree` конкретного
-  поля формы.
+`hasFieldErrors` используется как в сторах (`AuthStore`), так и в
+диалогах форм — единая точка правды.
 
 ### 6.2. Использование в компоненте
 
@@ -387,8 +399,18 @@ protected readonly loginForm = form(
 
 **Если у `problem` есть поле `errors`** — считайте, что полевые
 ошибки разложены по форме. **Общий баннер `error()` не показываем.**
-Это правило реализовано в `AuthStore`: перед записью в `error()`
-проверяется `hasFieldErrors(problem)`.
+
+Реализуется через `hasFieldErrors` из
+`src/app/core/utils/problem-details.ts`:
+
+```typescript
+if (!hasFieldErrors(problem)) {
+  this.error.set(extractErrorMessage(raw, 'Ошибка сохранения'));
+}
+```
+
+Это устраняет двойное уведомление: пользователь видит `<mat-error>`
+под полем, а баннер сверху не показывается.
 
 ### 6.5. Маппинг для новой формы
 
@@ -438,11 +460,15 @@ protected readonly loginForm = form(
 ## 9. Чек-лист для новой формы
 
 - [ ] Создан `XXX_FIELD_MAP` — C#-имена → camelCase полей формы.
+- [ ] Модель формы выведена из DTO: `Required<CreateXxxRequest>` или
+  `Omit<Required<CreateXxxRequest>, 'fk'> & { fk: number | null }`.
 - [ ] В `submission.action` вызван `buildServerFieldErrors`.
 - [ ] Есть `<mat-error>` под каждым полем, которое может прийти
   с сервера.
-- [ ] Стор не заполняет `error()` при наличии `errors` в `problem`.
-- [ ] Форма показывает баннер `error()` только для не-полевых ошибок.
+- [ ] **На полях с `[formField]` нет HTML-валидации** — `required`,
+  `min`, `max`, `step`, `pattern`, `minlength`, `maxlength` **запрещены**
+  Angular. Вся валидация — в схеме `form(...)`.
+- [ ] Баннер `error()` показывается только для не-полевых ошибок.
 - [ ] SnackBar для этого эндпоинта не появится (4xx фильтруется
   интерсептором).
 

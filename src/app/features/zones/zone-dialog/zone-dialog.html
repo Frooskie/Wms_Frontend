@@ -1,0 +1,61 @@
+<form [formRoot]="zoneForm">
+  <h2 mat-dialog-title>{{ title() }}</h2>
+
+  <mat-dialog-content class="form-grid">
+    <mat-form-field appearance="outline">
+      <mat-label>Название</mat-label>
+      <input matInput type="text" [formField]="zoneForm.name" />
+
+      @if (zoneForm.name().touched() && zoneForm.name().invalid()) {
+        <mat-error>{{ zoneForm.name().errors()[0]?.message }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Тип зоны</mat-label>
+      <mat-select [formField]="zoneForm.type">
+        @for (opt of zoneTypeOptions; track opt.value) {
+          <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Склад</mat-label>
+      <mat-select [formField]="zoneForm.warehouseId">
+        @for (w of warehousesResource.value() ?? []; track w.id) {
+          <mat-option [value]="w.id">{{ w.name }}</mat-option>
+        }
+      </mat-select>
+
+      @if (
+        zoneForm.warehouseId().touched() && zoneForm.warehouseId().invalid()
+        ) {
+        <mat-error>
+          {{ zoneForm.warehouseId().errors()[0]?.message }}
+        </mat-error>
+      }
+    </mat-form-field>
+
+    @if (error()) {
+      <div class="form-error" role="alert">{{ error() }}</div>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button matButton type="button" (click)="cancel()">Отмена</button>
+    <button
+      matButton="filled"
+      type="submit"
+      [disabled]="zoneForm().submitting()"
+      [showProgress]="zoneForm().submitting()"
+    >
+      Сохранить
+      <mat-progress-spinner
+        progressIndicator
+        diameter="20"
+        mode="indeterminate"
+      />
+    </button>
+  </mat-dialog-actions>
+</form>

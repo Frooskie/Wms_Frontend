@@ -1,0 +1,83 @@
+<div class="page">
+  <header class="page__header">
+    <h1 class="page__title">Стеллажи</h1>
+
+    @if (canEdit()) {
+      <button matButton="filled" type="button" (click)="openCreateDialog()">
+        Добавить стеллаж
+      </button>
+    }
+  </header>
+
+  @if (isLoading()) {
+    <div class="page__loading">
+      <mat-progress-spinner mode="indeterminate" diameter="40" />
+    </div>
+  } @else if (items().length === 0) {
+    <mat-card appearance="outlined">
+      <mat-card-content>Список стеллажей пуст.</mat-card-content>
+    </mat-card>
+  } @else {
+    <mat-card appearance="outlined">
+      <mat-card-content>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th class="data-table__id">ID</th>
+              <th>Код</th>
+              <th>Зона</th>
+              @if (canEdit()) {
+                <th class="data-table__actions">Действия</th>
+              }
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (rack of items(); track rack.id) {
+              <tr>
+                <td>{{ rack.id }}</td>
+                <td>{{ rack.code ?? '—' }}</td>
+                <td>{{ zoneMap().get(rack.zoneId!) ?? '—' }}</td>
+
+                @if (canEdit()) {
+                  <td class="data-table__actions">
+                    <button
+                      matButton="text"
+                      type="button"
+                      (click)="openEditDialog(rack)"
+                    >
+                      Изменить
+                    </button>
+
+                    <button
+                      matButton="text"
+                      type="button"
+                      [disabled]="deletingId() === rack.id"
+                      [showProgress]="deletingId() === rack.id"
+                      (click)="delete(rack)"
+                    >
+                      Удалить
+                      <mat-progress-spinner
+                        progressIndicator
+                        diameter="16"
+                        mode="indeterminate"
+                      />
+                    </button>
+                  </td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <mat-paginator
+    [length]="totalCount()"
+    [pageSize]="pageSize()"
+    [pageIndex]="pageNumber() - 1"
+    [pageSizeOptions]="[10, 25, 50]"
+    (page)="onPageChange($event)"
+  />
+</div>

@@ -1,1 +1,52 @@
-<router-outlet />
+@if (authStore.token()) {
+  <mat-sidenav-container class="shell">
+    <mat-sidenav mode="side" opened class="shell__nav">
+      <mat-toolbar class="shell__brand">
+        <span>{{ title() }}</span>
+      </mat-toolbar>
+
+      <mat-nav-list>
+        <a mat-list-item routerLink="/dashboard" routerLinkActive="active">
+          <mat-icon matListItemIcon>dashboard</mat-icon>
+          <span matListItemTitle>Панель</span>
+        </a>
+
+        <a mat-list-item routerLink="/products" routerLinkActive="active">
+          <mat-icon matListItemIcon>inventory_2</mat-icon>
+          <span matListItemTitle>Товары</span>
+        </a>
+
+        <a mat-list-item routerLink="/warehouses" routerLinkActive="active">
+          <mat-icon matListItemIcon>warehouse</mat-icon>
+          <span matListItemTitle>Склады</span>
+        </a>
+
+        <a mat-list-item routerLink="/zones" routerLinkActive="active">
+          <mat-icon matListItemIcon>map</mat-icon>
+          <span matListItemTitle>Зоны</span>
+        </a>
+
+        <a mat-list-item routerLink="/racks" routerLinkActive="active">
+          <mat-icon matListItemIcon>view_week</mat-icon>
+          <span matListItemTitle>Стеллажи</span>
+        </a>
+
+        <a mat-list-item routerLink="/shelves" routerLinkActive="active">
+          <mat-icon matListItemIcon>view_stream</mat-icon>
+          <span matListItemTitle>Полки</span>
+        </a>
+
+        <a mat-list-item routerLink="/cells" routerLinkActive="active">
+          <mat-icon matListItemIcon>grid_view</mat-icon>
+          <span matListItemTitle>Ячейки</span>
+        </a>
+      </mat-nav-list>
+    </mat-sidenav>
+
+    <mat-sidenav-content class="shell__content">
+      <router-outlet />
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+} @else {
+  <router-outlet />
+}

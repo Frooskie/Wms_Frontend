@@ -88,10 +88,11 @@ ng build
 - **`src/app/core/`** — общие механизмы: API-клиент, аутентификация,
   интерсепторы, глобальные сторы, утилиты.
 - **`src/app/features/`** — функциональные модули (auth, dashboard,
-  products, warehouse, batches, receipts, supply-requests,
-  supply-orders, audit, notifications).
-- **`src/app/shared/`** — переиспользуемые компоненты, директивы,
-  пайпы.
+  products, warehouses, zones, racks, shelves, cells, batches,
+  receipts, supply-requests, supply-orders, audit, notifications).
+- **`src/app/shared/`** — переиспользуемые компоненты (`ConfirmDialog`),
+  сервисы (`ConfirmationService`), стили (`shared/styles/*.scss`),
+  директивы, пайпы.
 - **`src/app/app.ts`** — корневой компонент.
 - **`src/app/app.config.ts`** — конфигурация приложения (провайдеры).
 - **`src/app/app.routes.ts`** — маршрутизация.
@@ -131,7 +132,9 @@ ng build
   не дублировать сообщения).
 - **Гарды:**
   - `authGuard` — пропускает только аутентифицированных;
-  - `chiefGuard` — пропускает только роль `Chief` (для `/register`).
+  - `hasRoleGuard(...roles)` — фабрика для проверки ролей. Пример:
+    `hasRoleGuard('Chief')` для `/register`,
+    `hasRoleGuard('Manager', 'Chief')` для CRUD-операций.
 - **Ролевая модель:** `Chief`, `Manager`, `Worker`, `StoreDirector`.
   UI-логика строится на `computed`-селекторах поверх
   `authStore.user()?.roles`.
@@ -158,13 +161,23 @@ ng build
 - **Standalone-компоненты**, без `NgModule`.
 - **`inject()`** вместо конструкторного DI.
 - **Signal Forms** для новых форм — не `ngModel`, не `FormControl`.
-- **`httpResource` / `rxResource`** для GET-запросов.
+  На полях с `[formField]` **запрещены** HTML-атрибуты валидации
+  (`required`, `min`, `max`, `step`, `pattern`) — вся валидация в
+  схеме `form(...)`.
+- **`rxResource`** для GET-запросов (через сервис-обёртку).
+  `httpResource` — только для запросов вне OpenAPI-спецификации.
+- **`firstValueFrom`** для мутаций в `async` методах
+  (`submission.action`, сервисы).
+- **Модели форм** выводятся из DTO:
+  - `Required<CreateXxxRequest>` — если FK-полей нет;
+  - `Omit<Required<CreateXxxRequest>, 'fk'> & { fk: number | null }` —
+    если есть FK (`MatSelect`).
 - **`@if` / `@for` / `@switch`** в шаблонах — старые структурные
   директивы запрещены.
 - **Design tokens Material** (`--mat-sys-*`) вместо хардкода цветов.
 - **`::ng-deep`** и переопределение `.mat-mdc-*` запрещены.
-- **Ошибки API** — обрабатываются по `ErrorCodes`, а не по тексту
-  сообщения. См. [`docs/error-handling.md`](docs/error-handling.md).
-
-Полный свод правил — в `angular_rules.xml` и `material_rules.xml` в
-корне проекта.
+- **Общие стили** — в `src/app/shared/styles/*.scss`, подключаются
+  через массив `styleUrls` (не `styleUrl` — оно принимает только
+  `string`).
+- **Ошибки API** — обрабатываются по `ErrorCodes`, а не по тексту.
+  См. [`docs/error-handling.md`](docs/error-handling.md).

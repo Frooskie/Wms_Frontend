@@ -58,3 +58,10 @@ export function extractErrorMessage(
 export function extractErrorCode(error: unknown): ErrorCodes | undefined {
   return toWmsProblemDetails(error)?.code;
 }
+
+/**
+ * Проверяет есть ли у `WmsProblemDetails` полевые ошибки (`errors`)
+ */
+export function hasFieldErrors(problem: WmsProblemDetails | null): boolean {
+  return !!problem?.errors && Object.keys(problem.errors).length > 0;
+}

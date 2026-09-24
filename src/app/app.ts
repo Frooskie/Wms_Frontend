@@ -1,17 +1,37 @@
 import { Component, inject, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { AuthStore } from './core/store/auth.store';
+import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import {
+  MatSidenav,
+  MatSidenavContainer,
+  MatSidenavContent,
+} from '@angular/material/sidenav';
+import { MatToolbar } from '@angular/material/toolbar';
+import { MatIcon } from '@angular/material/icon';
+import { MatNavList, MatListItem } from '@angular/material/list';
+import { AuthStore } from './core/store';
 
 @Component({
-  imports: [RouterOutlet],
   selector: 'app-root',
-  styleUrl: './app.scss',
+  imports: [
+    RouterOutlet,
+    RouterLink,
+    RouterLinkActive,
+    MatSidenav,
+    MatSidenavContainer,
+    MatSidenavContent,
+    MatToolbar,
+    MatIcon,
+    MatNavList,
+    MatListItem,
+  ],
   templateUrl: './app.html',
+  styleUrl: './app.scss',
 })
 export class App {
-  protected readonly title = signal('Wms');
+  protected readonly title = signal('WMS');
+  protected readonly authStore = inject(AuthStore);
 
   constructor() {
-    inject(AuthStore).loadUserFromStorage();
+    this.authStore.loadUserFromStorage();
   }
 }

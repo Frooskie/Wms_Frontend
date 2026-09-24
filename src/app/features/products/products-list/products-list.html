@@ -1,0 +1,93 @@
+<div class="page">
+  <header class="page__header">
+    <h1 class="page__title">Товары</h1>
+
+    @if (canEdit()) {
+      <button matButton="filled" type="button" (click)="openCreateDialog()">
+        Добавить товар
+      </button>
+    }
+  </header>
+
+  @if (isLoading()) {
+    <div class="page__loading">
+      <mat-progress-spinner mode="indeterminate" diameter="40" />
+    </div>
+  } @else if (items().length === 0) {
+    <mat-card appearance="outlined">
+      <mat-card-content>Список товаров пуст.</mat-card-content>
+    </mat-card>
+  } @else {
+    <mat-card appearance="outlined">
+      <mat-card-content>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th class="data-table__id">ID</th>
+              <th>Название</th>
+              <th>Производитель</th>
+              <th>Поставщик</th>
+              <th>Категория</th>
+              <th>Ед.</th>
+              <th class="data-table__num">Мин. остаток</th>
+
+              @if (canEdit()) {
+                <th class="data-table__actions">Действия</th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (product of items(); track product.id) {
+              <tr>
+                <td>{{ product.id }}</td>
+                <td>{{ product.name ?? '—' }}</td>
+                <td>{{ product.manufacturer ?? '—' }}</td>
+                <td>{{ product.supplier ?? '—' }}</td>
+                <td>{{ product.category ?? '—' }}</td>
+                <td>{{ product.unit ?? '—' }}</td>
+                <td class="data-table__num">
+                  {{ product.minStockThreshold ?? 0 }}
+                </td>
+
+                @if (canEdit()) {
+                  <td class="data-table__actions">
+                    <button
+                      matButton="text"
+                      type="button"
+                      (click)="openEditDialog(product)"
+                    >
+                      Изменить
+                    </button>
+
+                    <button
+                      matButton="text"
+                      type="button"
+                      [disabled]="deletingId() === product.id"
+                      [showProgress]="deletingId() === product.id"
+                      (click)="delete(product)"
+                    >
+                      Удалить
+                      <mat-progress-spinner
+                        progressIndicator
+                        diameter="16"
+                        mode="indeterminate"
+                      />
+                    </button>
+                  </td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <mat-paginator
+    [length]="totalCount()"
+    [pageSize]="pageSize()"
+    [pageIndex]="pageNumber() - 1"
+    [pageSizeOptions]="[10, 25, 50]"
+    (page)="onPageChange($event)"
+  />
+</div>

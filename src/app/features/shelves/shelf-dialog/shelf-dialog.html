@@ -1,0 +1,53 @@
+<form [formRoot]="shelfForm">
+  <h2 mat-dialog-title>{{ title() }}</h2>
+
+  <mat-dialog-content class="form-grid">
+    <mat-form-field appearance="outline">
+      <mat-label>Номер полки</mat-label>
+      <input
+        matInput
+        type="number"
+        step="1"
+        [formField]="shelfForm.number"
+      />
+
+      @if (shelfForm.number().touched() && shelfForm.number().invalid()) {
+        <mat-error>{{ shelfForm.number().errors()[0]?.message }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Стеллаж</mat-label>
+      <mat-select [formField]="shelfForm.rackId">
+        @for (r of racksResource.value() ?? []; track r.id) {
+          <mat-option [value]="r.id">{{ r.code }}</mat-option>
+        }
+      </mat-select>
+
+      @if (shelfForm.rackId().touched() && shelfForm.rackId().invalid()) {
+        <mat-error>{{ shelfForm.rackId().errors()[0]?.message }}</mat-error>
+      }
+    </mat-form-field>
+
+    @if (error()) {
+      <div class="form-error" role="alert">{{ error() }}</div>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button matButton type="button" (click)="cancel()">Отмена</button>
+    <button
+      matButton="filled"
+      type="submit"
+      [disabled]="shelfForm().submitting()"
+      [showProgress]="shelfForm().submitting()"
+    >
+      Сохранить
+      <mat-progress-spinner
+        progressIndicator
+        diameter="20"
+        mode="indeterminate"
+      />
+    </button>
+  </mat-dialog-actions>
+</form>

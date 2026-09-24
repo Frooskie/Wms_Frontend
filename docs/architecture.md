@@ -101,32 +101,47 @@
 
 ```
 src/app/
-├── core/ # Синглтоны и общие механизмы
-│ ├── api/ # Сгенерированный клиент (NSwag)
-│ ├── auth/ # Сервис аутентификации, гарды
-│ ├── interceptors/ # HTTP-интерсепторы (JWT, ошибки)
-│ ├── store/ # Глобальные SignalStore (Auth, Notifications)
-│ ├── services/ # Вспомогательные сервисы
-│ └── utils/ # Чистые утилиты (problem-details, form-errors)
-├── shared/ # Переиспользуемые компоненты, директивы, пайпы
-│ ├── components/
-│ ├── directives/
-│ └── pipes/
-├── features/ # Ленивые фичи (каждая — самостоятельный роут)
-│ ├── auth/ # Логин / регистрация
-│ ├── dashboard/ # Главная панель
-│ ├── products/ # Управление товарами
-│ ├── warehouse/ # Склады, зоны, стеллажи, полки, ячейки
-│ ├── batches/ # Партии и перемещение
-│ ├── receipts/ # Приёмка
-│ ├── supply-requests/ # Заявки магазина
-│ ├── supply-orders/ # Отгрузки
-│ ├── audit/ # Журнал транзакций
-│ └── notifications/ # Уведомления
-├── app.ts # Корневой компонент
-├── app.config.ts # Конфигурация приложения (провайдеры)
-└── app.routes.ts # Маршрутизация
+├── core/                    # Синглтоны и общие механизмы
+│   ├── api/                 # Сгенерированный клиент (NSwag)
+│   ├── auth/                # Сервис аутентификации, гарды
+│   ├── interceptors/        # HTTP-интерсепторы (JWT, ошибки)
+│   ├── store/               # Глобальные SignalStore (Auth, Notifications)
+│   ├── services/            # Вспомогательные сервисы
+│   └── utils/               # Чистые утилиты (problem-details, form-errors)
+├── shared/                  # Переиспользуемые компоненты, сервисы, стили
+│   ├── components/          # ConfirmDialog и др.
+│   ├── services/            # ConfirmationService и др.
+│   ├── styles/              # Общие SCSS (page, data-table, form-grid, form-error)
+│   ├── directives/
+│   └── pipes/
+├── features/                # Ленивые фичи (каждая — самостоятельный роут)
+│   ├── auth/                # Логин / регистрация
+│   ├── dashboard/           # Главная панель
+│   ├── products/            # Товары
+│   ├── warehouses/          # Склады
+│   ├── zones/               # Зоны хранения
+│   ├── racks/               # Стеллажи
+│   ├── shelves/             # Полки
+│   ├── cells/               # Ячейки
+│   ├── batches/             # Партии и перемещение
+│   ├── receipts/            # Приёмка
+│   ├── supply-requests/     # Заявки магазина
+│   ├── supply-orders/       # Отгрузки
+│   ├── audit/               # Журнал транзакций
+│   └── notifications/       # Уведомления
+├── app.ts                   # Корневой компонент
+├── app.config.ts            # Конфигурация приложения (провайдеры)
+└── app.routes.ts            # Маршрутизация
 ```
+
+**Правила размещения:**
+
+- **`core/`** — синглтоны, используемые во всём приложении.
+- **`shared/`** — переиспользуемые UI-компоненты, сервисы и стили,
+  не привязанные к одной фиче.
+- **`features/`** — самодостаточные фичи. Внутри — компоненты, диалоги,
+  сервис-обёртки над API для этой фичи. **Одна фича — одна папка**,
+  без вложенных «мега-фич».
 
 ---
 
@@ -143,7 +158,14 @@ src/app/
 | Гард | Файл | Назначение |
 |------|------|------------|
 | `authGuard` | `core/auth/auth.guard.ts` | Пропускает только аутентифицированных (по наличию токена). Иначе — редирект на `/login` с сохранением `returnUrl`. |
-| `chiefGuard` | `core/auth/chief.guard.ts` | Пропускает только пользователей с ролью `Chief`. Иначе — редирект на `/dashboard`. |
+| `hasRoleGuard(...roles)` | `core/auth/has-role.guard.ts` | **Фабрика функциональных гардов**: пропускает, если у пользователя есть хотя бы одна из переданных ролей. Иначе — редирект на `/dashboard`. |
+
+**Пример использования:**
+
+```typescript
+canActivate: [authGuard, hasRoleGuard('Chief')]
+canActivate: [authGuard, hasRoleGuard('Manager', 'Chief')]
+```
 
 ### 5.2. Композиция гардов
 
@@ -153,9 +175,9 @@ src/app/
 ```typescript
 {
   path: 'register',
-  loadComponent: () => import('./features/auth/register/register')
+    loadComponent: () => import('./features/auth/register/register')
     .then((m) => m.Register),
-  canActivate: [authGuard, chiefGuard],
+    canActivate: [authGuard, hasRoleGuard('Chief')],
 }
 ```
 
@@ -164,7 +186,7 @@ src/app/
 - `authGuard` первым — если пользователь не аутентифицирован,
   редирект на `/login?returnUrl=/register` (правильное поведение
   для анонима).
-- `chiefGuard` вторым — если аутентифицирован, но не Chief,
+- `hasRoleGuard('Chief')` вторым — если аутентифицирован, но не Chief,
   редирект на `/dashboard` (не на `/login` — пользователь уже в
   системе, просто без прав).
 
@@ -176,15 +198,23 @@ src/app/
   `SignalStore`.
 - **Локальное состояние** (фильтры, пагинация, состояние формы) —
   сигналы компонента.
-- **Запросы к API** — через `httpResource` / `rxResource` с
-  автоматической реактивностью.
-- **Мутации** — через методы API-клиента; после успеха вызывается
-  `reload()` / `refetch()` зависимого ресурса.
+- **Запросы к API** — через `rxResource` + сервис-обёртку
+  (см. `api-integration.md` §3). `httpResource` используется
+  только для запросов вне OpenAPI-спецификации.
+- **Мутации** — через методы сервиса-обёртки с `firstValueFrom`;
+  после успеха вызывается `reload()` зависимого `rxResource`.
 
 **Signal Forms `submission.action`** принимает два аргумента —
 `(field, detail)` — и возвращает `TreeValidationResult`. Это
 позволяет раскладывать серверные ошибки валидации по конкретным
-полям формы (см. [error-handling.md](./error-handling.md) §6).
+полям формы (см. `error-handling.md` §6).
+
+**Модель формы** выводится из DTO бэкенда:
+
+- Без FK — `Required<CreateXxxRequest>`.
+- С FK — `Omit<Required<CreateXxxRequest>, 'fkField'> & { fkField: number | null }`.
+
+См. `api-integration.md` §5.1.
 
 ---
 
@@ -213,7 +243,9 @@ JWT хранится в `localStorage` под ключом `access_token`; да�
 ### 7.3. Гарды
 
 - `authGuard` — проверяет наличие токена.
-- `chiefGuard` — проверяет роль `Chief` для админских маршрутов.
+- `hasRoleGuard(...roles)` — фабрика функциональных гардов для
+  проверки ролей. Пример: `hasRoleGuard('Chief')` для админских
+  маршрутов.
 - Композиция — см. §5.2.
 
 ### 7.4. Ролевая модель
@@ -267,6 +299,24 @@ mode).
 - **Переопределение `.mat-mdc-*` классов запрещено** — только токены.
 - **`ngClass` / `ngStyle` запрещены** — используются `class` и
   `style` bindings.
+- **Общие стили** живут в `src/app/shared/styles/`:
+  - `page.scss` — обёртка страницы списка (`.page`, `.page__header`).
+  - `data-table.scss` — таблица (`.data-table`, модификаторы).
+  - `form-grid.scss` — сетка полей диалога.
+  - `form-error.scss` — баннер ошибки формы.
+- **Подключение общих стилей** — через массив `styleUrls` в
+  `@Component`:
+
+  ```typescript
+  @Component({
+    // ...
+    styleUrls: [
+      './products-list.scss',
+      '../../../shared/styles/page.scss',
+      '../../../shared/styles/data-table.scss',
+    ],
+  })
+  ```
 
 ---
 
@@ -319,8 +369,12 @@ mode).
 - **Material 22 + M3-токены** — консистентный UI.
 - **Три уровня обработки ошибок** — глобальные правила отделены
   от контекстных.
-- **Функциональные гарды с композицией** — гибкая защита
-  маршрутов.
+- **Функциональные гарды с композицией** (`hasRoleGuard`) — гибкая
+  защита маршрутов.
+- **Feature-first с сервисами-обёртками** — каждый домен
+  инкапсулирован, компоненты не знают про URL и DTO напрямую.
+- **`rxResource` для чтения, `firstValueFrom` для мутаций** —
+  единый паттерн работы с API.
 
 **Связанные документы:**
 - [Интеграция с бэкендом (API)](./api-integration.md)
