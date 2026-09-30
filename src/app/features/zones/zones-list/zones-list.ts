@@ -13,6 +13,7 @@ import { ZoneService } from '../zone.service';
 import { WarehouseService } from '../../warehouses/warehouses.service';
 import { ZoneDialog } from '../zone-dialog/zone-dialog';
 import { ConfirmationService } from '../../../shared/services/confirmation.service';
+import { showMutationError } from '../../../core/utils/mutation-errors';
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -134,8 +135,8 @@ export class ZonesList {
       }
 
       this.snackBar.open('Зона удалена', 'Закрыть', { duration: 3000 });
-    } catch {
-      // интерсептор
+    } catch (raw: unknown) {
+      showMutationError(this.snackBar, raw, 'Не удалось удалить зону');
     } finally {
       this.deletingId.set(null);
     }

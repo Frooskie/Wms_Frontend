@@ -13,6 +13,7 @@ import { ShelfService } from '../../shelves/shelf.service';
 import { CellDialog } from '../cell-dialog/cell-dialog';
 import { CellService } from '../cell.service';
 import { ConfirmationService } from '../../../shared/services/confirmation.service';
+import { showMutationError } from '../../../core/utils/mutation-errors';
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -127,8 +128,8 @@ export class CellsList {
       }
 
       this.snackBar.open('Ячейка удалена', 'Закрыть', { duration: 3000 });
-    } catch {
-      // интерсептор
+    } catch (raw: unknown) {
+      showMutationError(this.snackBar, raw, 'Не удалось удалить ячейку');
     } finally {
       this.deletingId.set(null);
     }

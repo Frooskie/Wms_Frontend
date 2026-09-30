@@ -1,0 +1,11 @@
+.filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.filters__reset {
+  align-self: center;
+  justify-self: start;
+}

@@ -12,6 +12,7 @@ import { AuthStore } from '../../../core/store';
 import { ConfirmationService } from '../../../shared/services/confirmation.service';
 import { ProductDialog } from '../product-dialog/product-dialog';
 import { ProductService } from '../product.service';
+import { showMutationError } from '../../../core/utils/mutation-errors';
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -118,8 +119,8 @@ export class ProductsList {
       }
 
       this.snackBar.open('Товар удалён', 'Закрыть', { duration: 3000 });
-    } catch {
-      // 4xx — форма/стор; 5xx/сеть — snackbar интерсептора
+    } catch (raw: unknown) {
+      showMutationError(this.snackBar, raw, 'Не удалось удалить товар');
     } finally {
       this.deletingId.set(null);
     }

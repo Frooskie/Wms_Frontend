@@ -13,6 +13,7 @@ import { RackService } from '../../racks/rack.service';
 import { ShelfDialog } from '../shelf-dialog/shelf-dialog';
 import { ShelfService } from '../shelf.service';
 import { ConfirmationService } from '../../../shared/services/confirmation.service';
+import { showMutationError } from '../../../core/utils/mutation-errors';
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -129,8 +130,8 @@ export class ShelvesList {
       }
 
       this.snackBar.open('Полка удалена', 'Закрыть', { duration: 3000 });
-    } catch {
-      // интерсептор
+    } catch (raw: unknown) {
+      showMutationError(this.snackBar, raw, 'Не удалось удалить полку');
     } finally {
       this.deletingId.set(null);
     }

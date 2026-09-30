@@ -12,6 +12,7 @@ import { AuthStore } from '../../../core/store';
 import { WarehouseDialog } from '../warehouse-dialog/warehouse-dialog';
 import { WarehouseService } from '../warehouses.service';
 import { ConfirmationService } from '../../../shared/services/confirmation.service';
+import { showMutationError } from '../../../core/utils/mutation-errors';
 
 
 const DEFAULT_PAGE_SIZE = 10;
@@ -119,8 +120,8 @@ export class WarehousesList {
       }
 
       this.snackBar.open('Склад удалён', 'Закрыть', { duration: 3000 });
-    } catch {
-      // интерсептор
+    } catch (raw: unknown) {
+      showMutationError(this.snackBar, raw, 'Не удалось удалить склад');
     } finally {
       this.deletingId.set(null);
     }

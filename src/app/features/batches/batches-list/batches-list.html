@@ -1,0 +1,151 @@
+<div class="page">
+  <header class="page__header">
+    <h1 class="page__title">Партии</h1>
+
+    @if (canEdit()) {
+      <button matButton="filled" type="button" (click)="openCreateDialog()">
+        Добавить партию
+      </button>
+    }
+  </header>
+
+  <mat-card appearance="outlined">
+    <mat-card-content>
+      <div class="filters">
+        <mat-form-field appearance="outline">
+          <mat-label>Товар</mat-label>
+          <mat-select
+            [value]="productId()"
+            (selectionChange)="onProductFilterChange($event.value)"
+          >
+            <mat-option [value]="null">Все товары</mat-option>
+            @for (p of productsResource.value() ?? []; track p.id) {
+              <mat-option [value]="p.id">{{ p.name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Ячейка</mat-label>
+          <mat-select
+            [value]="cellId()"
+            (selectionChange)="onCellFilterChange($event.value)"
+          >
+            <mat-option [value]="null">Все ячейки</mat-option>
+            @for (c of cellsResource.value() ?? []; track c.id) {
+              <mat-option [value]="c.id">{{ c.code }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Срок годности от</mat-label>
+          <input
+            matInput
+            type="date"
+            [value]="expiryFrom()"
+            (change)="onExpiryFromChange(fromInput.value)"
+            #fromInput
+          />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Срок годности до</mat-label>
+          <input
+            matInput
+            type="date"
+            [value]="expiryTo()"
+            (change)="onExpiryToChange(toInput.value)"
+            #toInput
+          />
+        </mat-form-field>
+
+        @if (hasActiveFilters()) {
+          <button
+            matButton="text"
+            type="button"
+            class="filters__reset"
+            (click)="resetFilters()"
+          >
+            Сбросить
+          </button>
+        }
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  @if (isLoading()) {
+    <div class="page__loading">
+      <mat-progress-spinner mode="indeterminate" diameter="40" />
+    </div>
+  } @else if (items().length === 0) {
+    <mat-card appearance="outlined">
+      <mat-card-content>
+        @if (hasActiveFilters()) {
+          Партии по заданным фильтрам не найдены.
+        } @else {
+          Список партий пуст.
+        }
+      </mat-card-content>
+    </mat-card>
+  } @else {
+    <mat-card appearance="outlined">
+      <mat-card-content>
+        <table class="data-table">
+          <thead>
+          <tr>
+            <th class="data-table__id">ID</th>
+            <th>Товар</th>
+            <th class="data-table__num">Кол-во</th>
+            <th class="data-table__num">Доступно</th>
+            <th>Ячейка</th>
+            <th>Срок годности</th>
+
+            @if (canEdit()) {
+              <th class="data-table__actions">Действия</th>
+            }
+          </tr>
+          </thead>
+          <tbody>
+            @for (batch of items(); track batch.id) {
+              <tr>
+                <td>{{ batch.id }}</td>
+                <td>{{ batch.productName ?? '—' }}</td>
+                <td class="data-table__num">{{ batch.quantity ?? 0 }}</td>
+                <td class="data-table__num">{{ batch.availableQuantity ?? 0 }}</td>
+                <td>{{ batch.cellCode ?? '—' }}</td>
+                <td>
+                  @if (batch.expiryDate) {
+                    {{ batch.expiryDate | date: 'dd.MM.yyyy' }}
+                  } @else {
+                    —
+                  }
+                </td>
+
+                @if (canEdit()) {
+                  <td class="data-table__actions">
+                    <button
+                      matButton="text"
+                      type="button"
+                      (click)="openMoveDialog(batch)"
+                    >
+                      Переместить
+                    </button>
+                  </td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <mat-paginator
+    [length]="totalCount()"
+    [pageSize]="pageSize()"
+    [pageIndex]="pageNumber() - 1"
+    [pageSizeOptions]="[10, 25, 50]"
+    (page)="onPageChange($event)"
+  />
+</div>

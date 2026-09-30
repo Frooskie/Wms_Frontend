@@ -1,0 +1,98 @@
+<form [formRoot]="batchForm">
+  <h2 mat-dialog-title>Новая партия</h2>
+
+  <mat-dialog-content>
+    <div class="form-grid">
+      <mat-form-field appearance="outline">
+        <mat-label>Товар</mat-label>
+        <mat-select [formField]="batchForm.productId">
+          @for (p of productsResource.value() ?? []; track p.id) {
+            <mat-option [value]="p.id">{{ p.name }}</mat-option>
+          }
+        </mat-select>
+
+        @if (
+          batchForm.productId().touched() && batchForm.productId().invalid()
+          ) {
+          <mat-error>{{ batchForm.productId().errors()[0]?.message }}</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Ячейка</mat-label>
+        <mat-select [formField]="batchForm.cellId">
+          @for (c of availableCells(); track c.id) {
+            <mat-option [value]="c.id">{{ c.code }}</mat-option>
+          }
+        </mat-select>
+
+        @if (batchForm.cellId().touched() && batchForm.cellId().invalid()) {
+          <mat-error>{{ batchForm.cellId().errors()[0]?.message }}</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Количество</mat-label>
+        <input matInput type="number" [formField]="batchForm.quantity" />
+
+        @if (batchForm.quantity().touched() && batchForm.quantity().invalid()) {
+          <mat-error>{{ batchForm.quantity().errors()[0]?.message }}</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Закупочная цена</mat-label>
+        <input matInput type="number" [formField]="batchForm.purchasePrice" />
+
+        @if (batchForm.purchasePrice().touched() && batchForm.purchasePrice().invalid()) {
+          <mat-error>
+            {{ batchForm.purchasePrice().errors()[0]?.message }}
+          </mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Дата производства</mat-label>
+        <input matInput type="date" [formField]="batchForm.productionDate" />
+
+        @if (batchForm.productionDate().touched() && batchForm.productionDate().invalid()) {
+          <mat-error>
+            {{ batchForm.productionDate().errors()[0]?.message }}
+          </mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Срок годности</mat-label>
+        <input matInput type="date" [formField]="batchForm.expiryDate" />
+
+        @if (batchForm.expiryDate().touched() && batchForm.expiryDate().invalid()) {
+          <mat-error>
+            {{ batchForm.expiryDate().errors()[0]?.message }}
+          </mat-error>
+        }
+      </mat-form-field>
+
+      @if (error()) {
+        <div class="form-error" role="alert">{{ error() }}</div>
+      }
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button matButton type="button" (click)="cancel()">Отмена</button>
+    <button
+      matButton="filled"
+      type="submit"
+      [disabled]="batchForm().submitting()"
+      [showProgress]="batchForm().submitting()"
+    >
+      Сохранить
+      <mat-progress-spinner
+        progressIndicator
+        diameter="20"
+        mode="indeterminate"
+      />
+    </button>
+  </mat-dialog-actions>
+</form>

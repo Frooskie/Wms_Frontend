@@ -59,6 +59,14 @@ export const routes: Routes = [
       import('./features/cells/cells-list/cells-list').then((m) => m.CellsList),
     canActivate: [authGuard],
   },
+  {
+    path: 'batches',
+    loadComponent: () =>
+      import('./features/batches/batches-list/batches-list').then(
+        (m) => m.BatchesList,
+      ),
+    canActivate: [authGuard],
+  },
 
   { path: '**', redirectTo: 'dashboard' },
 ];

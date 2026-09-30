@@ -7,7 +7,8 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "generate-api": "nswag run nswag.json"
+    "generate-api": "nswag run nswag.json",
+    "seed": "node scripts/seed.mjs"
   },
   "private": true,
   "packageManager": "npm@12.0.2",

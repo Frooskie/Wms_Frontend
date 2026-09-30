@@ -1,0 +1,60 @@
+<form [formRoot]="batchForm">
+  <h2 mat-dialog-title>Перемещение партии</h2>
+
+  <mat-dialog-content>
+    <div class="form-grid">
+      <div class="move-context">
+        <div>
+          <span class="move-context__label">Товар:</span>
+          {{ batch().productName ?? '—' }}
+        </div>
+
+        <div>
+          <span class="move-context__label">Текущая ячейка:</span>
+          {{ batch().cellCode ?? '—' }}
+        </div>
+
+        <div>
+          <span class="move-context__label">Доступное количество:</span>
+          {{ batch().availableQuantity ?? 0 }}
+        </div>
+      </div>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Новая ячейка</mat-label>
+        <mat-select [formField]="batchForm.cellId">
+          @for (c of availableCells(); track c.id) {
+            <mat-option [value]="c.id">
+              {{ c.code }}
+            </mat-option>
+          }
+        </mat-select>
+
+        @if (batchForm.cellId().touched() && batchForm.cellId().invalid()) {
+          <mat-error>{{ batchForm.cellId().errors()[0]?.message }}</mat-error>
+        }
+      </mat-form-field>
+
+      @if (error()) {
+        <div class="form-error" role="alert">{{ error() }}</div>
+      }
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button matButton type="button" (click)="cancel()">Отмена</button>
+    <button
+      matButton="filled"
+      type="submit"
+      [disabled]="batchForm().submitting()"
+      [showProgress]="batchForm().submitting()"
+    >
+      Переместить
+      <mat-progress-spinner
+        progressIndicator
+        diameter="20"
+        mode="indeterminate"
+      />
+    </button>
+  </mat-dialog-actions>
+</form>

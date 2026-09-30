@@ -1,37 +1,16 @@
-import {
-  Component,
-  computed,
-  inject,
-  input,
-  linkedSignal,
-  output,
-  signal,
-} from '@angular/core';
+import { Component, computed, inject, input, linkedSignal, output, signal, } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { Observable, firstValueFrom } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 import { form, FormField, FormRoot, required } from '@angular/forms/signals';
 import { MatButton } from '@angular/material/button';
-import {
-  MatDialogActions,
-  MatDialogContent,
-  MatDialogRef,
-  MatDialogTitle,
-} from '@angular/material/dialog';
+import { MatDialogActions, MatDialogContent, MatDialogRef, MatDialogTitle, } from '@angular/material/dialog';
 import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatOption, MatSelect } from '@angular/material/select';
-import {
-  CreateZoneRequest,
-  WmsProblemDetails,
-  ZoneDto,
-} from '../../../core/api/wms-api';
+import { CreateZoneRequest, WmsProblemDetails, ZoneDto, ZoneType, } from '../../../core/api/wms-api';
 import { buildServerFieldErrors } from '../../../core/utils/form-errors';
-import {
-  extractErrorMessage,
-  hasFieldErrors,
-  toWmsProblemDetails,
-} from '../../../core/utils/problem-details';
+import { extractErrorMessage, hasFieldErrors, toWmsProblemDetails, } from '../../../core/utils/problem-details';
 import { ZoneService } from '../zone.service';
 import { WarehouseService } from '../../warehouses/warehouses.service';
 
@@ -53,7 +32,7 @@ type ZoneFormModel = Omit<Required<CreateZoneRequest>, 'warehouseId'> & {
 
 const EMPTY_MODEL: ZoneFormModel = {
   name: '',
-  type: 'Normal',
+  type: ZoneType.Normal,
   warehouseId: null,
 };
 
@@ -100,7 +79,7 @@ export class ZoneDialog {
     return z
       ? {
         name: z.name ?? '',
-        type: z.type ?? 'Normal',
+        type: z.type ?? ZoneType.Normal,
         warehouseId: z.warehouseId ?? null,
       }
       : { ...EMPTY_MODEL };
