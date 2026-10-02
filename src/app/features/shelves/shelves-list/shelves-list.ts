@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, inputBinding, outputBinding, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { MatButton } from '@angular/material/button';
 import { MatCard, MatCardContent } from '@angular/material/card';
@@ -74,9 +74,7 @@ export class ShelvesList {
   protected readonly totalCount = computed(
     () => this.shelvesResource.value()?.totalCount ?? 0,
   );
-  protected readonly isLoading = computed(() =>
-    this.shelvesResource.isLoading(),
-  );
+  protected readonly isLoading = this.shelvesResource.isLoading;
 
   protected onPageChange(event: PageEvent): void {
     this.pageNumber.set(event.pageIndex + 1);
@@ -84,22 +82,26 @@ export class ShelvesList {
   }
 
   protected openCreateDialog(): void {
-    const ref = this.dialog.open(ShelfDialog);
-
-    ref.componentRef?.setInput('shelf', null);
-    ref.componentInstance.saved.subscribe(() => {
-      this.shelvesResource.reload();
-      this.snackBar.open('Полка создана', 'Закрыть', { duration: 3000 });
+    this.dialog.open(ShelfDialog, {
+      bindings: [
+        inputBinding('shelf', () => null),
+        outputBinding<void>('saved', () => {
+          this.shelvesResource.reload();
+          this.snackBar.open('Полка создана', 'Закрыть', { duration: 3000 });
+        }),
+      ],
     });
   }
 
   protected openEditDialog(shelf: ShelfDto): void {
-    const ref = this.dialog.open(ShelfDialog);
-
-    ref.componentRef?.setInput('shelf', shelf);
-    ref.componentInstance.saved.subscribe(() => {
-      this.shelvesResource.reload();
-      this.snackBar.open('Полка обновлена', 'Закрыть', { duration: 3000 });
+    this.dialog.open(ShelfDialog, {
+      bindings: [
+        inputBinding('shelf', () => shelf),
+        outputBinding<void>('saved', () => {
+          this.shelvesResource.reload();
+          this.snackBar.open('Полка обновлена', 'Закрыть', { duration: 3000 });
+        }),
+      ],
     });
   }
 

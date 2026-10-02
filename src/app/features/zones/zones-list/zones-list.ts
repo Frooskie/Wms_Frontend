@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, inputBinding, outputBinding, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { MatButton } from '@angular/material/button';
 import { MatCard, MatCardContent } from '@angular/material/card';
@@ -81,7 +81,7 @@ export class ZonesList {
   protected readonly totalCount = computed(
     () => this.zonesResource.value()?.totalCount ?? 0,
   );
-  protected readonly isLoading = computed(() => this.zonesResource.isLoading());
+  protected readonly isLoading = this.zonesResource.isLoading;
 
   protected onPageChange(event: PageEvent): void {
     this.pageNumber.set(event.pageIndex + 1);
@@ -89,22 +89,26 @@ export class ZonesList {
   }
 
   protected openCreateDialog(): void {
-    const ref = this.dialog.open(ZoneDialog);
-
-    ref.componentRef?.setInput('zone', null);
-    ref.componentInstance.saved.subscribe(() => {
-      this.zonesResource.reload();
-      this.snackBar.open('Зона создана', 'Закрыть', { duration: 3000 });
+    this.dialog.open(ZoneDialog, {
+      bindings: [
+        inputBinding('zone', () => null),
+        outputBinding<void>('saved', () => {
+          this.zonesResource.reload();
+          this.snackBar.open('Зона создана', 'Закрыть', { duration: 3000 });
+        }),
+      ],
     });
   }
 
   protected openEditDialog(zone: ZoneDto): void {
-    const ref = this.dialog.open(ZoneDialog);
-
-    ref.componentRef?.setInput('zone', zone);
-    ref.componentInstance.saved.subscribe(() => {
-      this.zonesResource.reload();
-      this.snackBar.open('Зона обновлена', 'Закрыть', { duration: 3000 });
+    this.dialog.open(ZoneDialog, {
+      bindings: [
+        inputBinding('zone', () => zone),
+        outputBinding<void>('saved', () => {
+          this.zonesResource.reload();
+          this.snackBar.open('Зона обновлена', 'Закрыть', { duration: 3000 });
+        }),
+      ],
     });
   }
 

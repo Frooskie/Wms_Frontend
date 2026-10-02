@@ -1,4 +1,5 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import { Component, computed, inject, inputBinding, outputBinding, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { MatButton } from '@angular/material/button';
 import { MatCard, MatCardContent } from '@angular/material/card';
@@ -9,17 +10,14 @@ import { MatOption, MatSelect } from '@angular/material/select';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { firstValueFrom } from 'rxjs';
 
 import { BatchDto } from '../../../core/api/wms-api';
 import { AuthStore } from '../../../core/store';
-import { ConfirmationService } from '../../../shared/services/confirmation.service';
 import { CellService } from '../../cells/cell.service';
 import { ProductService } from '../../products/product.service';
 import { BatchDialog } from '../batch-dialog/batch-dialog';
 import { BatchMoveDialog } from '../batch-move-dialog/batch-move-dialog';
 import { BatchService } from '../batch.service';
-import { DatePipe } from '@angular/common';
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -102,8 +100,14 @@ export class BatchesList {
   protected readonly totalCount = computed(
     () => this.batchesResource.value()?.totalCount ?? 0,
   );
-  protected readonly isLoading = computed(() =>
-    this.batchesResource.isLoading(),
+  protected readonly isLoading = this.batchesResource.isLoading;
+
+  protected readonly hasActiveFilters = computed(
+    () =>
+      this.productId() !== null ||
+      this.cellId() !== null ||
+      this.expiryFrom() !== '' ||
+      this.expiryTo() !== '',
   );
 
   protected onPageChange(event: PageEvent): void {
@@ -139,21 +143,15 @@ export class BatchesList {
     this.pageNumber.set(1);
   }
 
-  protected readonly hasActiveFilters = computed(
-    () =>
-      this.productId() !== null ||
-      this.cellId() !== null ||
-      this.expiryFrom() !== '' ||
-      this.expiryTo() !== '',
-  );
-
   protected openCreateDialog(): void {
-    const ref = this.dialog.open(BatchDialog);
-
-    ref.componentRef?.setInput('batch', null);
-    ref.componentInstance.saved.subscribe(() => {
-      this.batchesResource.reload();
-      this.snackBar.open('Партия создана', 'Закрыть', { duration: 3000 });
+    this.dialog.open(BatchDialog, {
+      bindings: [
+        inputBinding('batch', () => null),
+        outputBinding<void>('saved', () => {
+          this.batchesResource.reload();
+          this.snackBar.open('Партия создана', 'Закрыть', { duration: 3000 });
+        }),
+      ],
     });
   }
 
@@ -162,12 +160,14 @@ export class BatchesList {
       return;
     }
 
-    const ref = this.dialog.open(BatchMoveDialog);
-
-    ref.componentRef?.setInput('batch', batch);
-    ref.componentInstance.moved.subscribe(() => {
-      this.batchesResource.reload();
-      this.snackBar.open('Партия перемещена', 'Закрыть', { duration: 3000 });
+    this.dialog.open(BatchMoveDialog, {
+      bindings: [
+        inputBinding('batch', () => batch),
+        outputBinding<void>('moved', () => {
+          this.batchesResource.reload();
+          this.snackBar.open('Партия перемещена', 'Закрыть', { duration: 3000 });
+        }),
+      ],
     });
   }
 }

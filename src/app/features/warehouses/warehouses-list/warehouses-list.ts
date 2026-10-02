@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, inputBinding, outputBinding, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { MatButton } from '@angular/material/button';
 import { MatCard, MatCardContent } from '@angular/material/card';
@@ -64,9 +64,7 @@ export class WarehousesList {
   protected readonly totalCount = computed(
     () => this.warehousesResource.value()?.totalCount ?? 0,
   );
-  protected readonly isLoading = computed(() =>
-    this.warehousesResource.isLoading(),
-  );
+  protected readonly isLoading = this.warehousesResource.isLoading;
 
   protected onPageChange(event: PageEvent): void {
     this.pageNumber.set(event.pageIndex + 1);
@@ -74,22 +72,26 @@ export class WarehousesList {
   }
 
   protected openCreateDialog(): void {
-    const ref = this.dialog.open(WarehouseDialog);
-
-    ref.componentRef?.setInput('warehouse', null);
-    ref.componentInstance.saved.subscribe(() => {
-      this.warehousesResource.reload();
-      this.snackBar.open('Склад создан', 'Закрыть', { duration: 3000 });
+    this.dialog.open(WarehouseDialog, {
+      bindings: [
+        inputBinding('warehouse', () => null),
+        outputBinding<void>('saved', () => {
+          this.warehousesResource.reload();
+          this.snackBar.open('Склад создан', 'Закрыть', { duration: 3000 });
+        }),
+      ],
     });
   }
 
   protected openEditDialog(warehouse: WarehouseDto): void {
-    const ref = this.dialog.open(WarehouseDialog);
-
-    ref.componentRef?.setInput('warehouse', warehouse);
-    ref.componentInstance.saved.subscribe(() => {
-      this.warehousesResource.reload();
-      this.snackBar.open('Склад обновлён', 'Закрыть', { duration: 3000 });
+    this.dialog.open(WarehouseDialog, {
+      bindings: [
+        inputBinding('warehouse', () => warehouse),
+        outputBinding<void>('saved', () => {
+          this.warehousesResource.reload();
+          this.snackBar.open('Склад обновлён', 'Закрыть', { duration: 3000 });
+        }),
+      ],
     });
   }
 

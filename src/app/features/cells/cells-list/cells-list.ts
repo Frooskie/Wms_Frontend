@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, inputBinding, outputBinding, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { MatButton } from '@angular/material/button';
 import { MatCard, MatCardContent } from '@angular/material/card';
@@ -74,7 +74,7 @@ export class CellsList {
   protected readonly totalCount = computed(
     () => this.cellsResource.value()?.totalCount ?? 0,
   );
-  protected readonly isLoading = computed(() => this.cellsResource.isLoading());
+  protected readonly isLoading = this.cellsResource.isLoading;
 
   protected onPageChange(event: PageEvent): void {
     this.pageNumber.set(event.pageIndex + 1);
@@ -82,22 +82,26 @@ export class CellsList {
   }
 
   protected openCreateDialog(): void {
-    const ref = this.dialog.open(CellDialog);
-
-    ref.componentRef?.setInput('cell', null);
-    ref.componentInstance.saved.subscribe(() => {
-      this.cellsResource.reload();
-      this.snackBar.open('Ячейка создана', 'Закрыть', { duration: 3000 });
+    this.dialog.open(CellDialog, {
+      bindings: [
+        inputBinding('cell', () => null),
+        outputBinding<void>('saved', () => {
+          this.cellsResource.reload();
+          this.snackBar.open('Ячейка создана', 'Закрыть', { duration: 3000 });
+        }),
+      ],
     });
   }
 
   protected openEditDialog(cell: CellDto): void {
-    const ref = this.dialog.open(CellDialog);
-
-    ref.componentRef?.setInput('cell', cell);
-    ref.componentInstance.saved.subscribe(() => {
-      this.cellsResource.reload();
-      this.snackBar.open('Ячейка обновлена', 'Закрыть', { duration: 3000 });
+    this.dialog.open(CellDialog, {
+      bindings: [
+        inputBinding('cell', () => cell),
+        outputBinding<void>('saved', () => {
+          this.cellsResource.reload();
+          this.snackBar.open('Ячейка обновлена', 'Закрыть', { duration: 3000 });
+        }),
+      ],
     });
   }
 

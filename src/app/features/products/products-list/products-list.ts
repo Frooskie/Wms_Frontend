@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, inputBinding, outputBinding, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { MatButton } from '@angular/material/button';
 import { MatCard, MatCardContent } from '@angular/material/card';
@@ -63,9 +63,7 @@ export class ProductsList {
   protected readonly totalCount = computed(
     () => this.productsResource.value()?.totalCount ?? 0,
   );
-  protected readonly isLoading = computed(() =>
-    this.productsResource.isLoading(),
-  );
+  protected readonly isLoading = this.productsResource.isLoading;
 
   protected onPageChange(event: PageEvent): void {
     this.pageNumber.set(event.pageIndex + 1);
@@ -73,22 +71,26 @@ export class ProductsList {
   }
 
   protected openCreateDialog(): void {
-    const ref = this.dialog.open(ProductDialog);
-
-    ref.componentRef?.setInput('product', null);
-    ref.componentInstance.saved.subscribe(() => {
-      this.productsResource.reload();
-      this.snackBar.open('Товар создан', 'Закрыть', { duration: 3000 });
+    this.dialog.open(ProductDialog, {
+      bindings: [
+        inputBinding('product', () => null),
+        outputBinding<void>('saved', () => {
+          this.productsResource.reload();
+          this.snackBar.open('Товар создан', 'Закрыть', { duration: 3000 });
+        }),
+      ],
     });
   }
 
   protected openEditDialog(product: ProductDto): void {
-    const ref = this.dialog.open(ProductDialog);
-
-    ref.componentRef?.setInput('product', product);
-    ref.componentInstance.saved.subscribe(() => {
-      this.productsResource.reload();
-      this.snackBar.open('Товар обновлён', 'Закрыть', { duration: 3000 });
+    this.dialog.open(ProductDialog, {
+      bindings: [
+        inputBinding('product', () => product),
+        outputBinding<void>('saved', () => {
+          this.productsResource.reload();
+          this.snackBar.open('Товар обновлён', 'Закрыть', { duration: 3000 });
+        }),
+      ],
     });
   }
 
